@@ -18,10 +18,16 @@
  */
 package org.apache.pulsar.common.naming;
 
+import com.google.common.hash.Hashing;
+import java.nio.charset.StandardCharsets;
 import org.apache.pulsar.broker.PulsarService;
 
 public interface TopicBundleAssignmentStrategy {
-    NamespaceBundle findBundle(TopicName topicName,  NamespaceBundles namespaceBundles);
+    NamespaceBundle findBundle(TopicName topicName, NamespaceBundles namespaceBundles);
+
+    default long calculateBundleHashCode(TopicName topicName) {
+        return Hashing.crc32().hashString(topicName.toString(), StandardCharsets.UTF_8).padToLong();
+    }
 
     void init(PulsarService pulsarService);
 }
