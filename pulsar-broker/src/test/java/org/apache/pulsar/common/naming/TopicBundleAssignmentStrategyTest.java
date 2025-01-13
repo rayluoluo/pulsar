@@ -23,11 +23,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import com.google.common.base.Charsets;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
 import com.google.common.hash.Hashing;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -139,7 +139,7 @@ public class TopicBundleAssignmentStrategyTest {
             // use topic name without partition id to decide the first hash value
             long currentPartitionTopicHash =
                     pulsar.getNamespaceService().getNamespaceBundleFactory().getHashFunc()
-                            .hashString(topicName.getPartitionedTopicName(), Charsets.UTF_8).padToLong();
+                            .hashString(topicName.getPartitionedTopicName(), StandardCharsets.UTF_8).padToLong();
 
             // if the topic is a non partition topic, use topic name to calculate the hashcode
             if (!topicName.isPartitioned()) {
