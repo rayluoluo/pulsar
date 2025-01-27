@@ -33,7 +33,7 @@
 <!--       <AppenderRef ref="CONSOLE" />-->
 <!--    </Logger>-->
 
-    <Root level="INFO">
+    <Root level="DEBUG">
       <AppenderRef ref="CONSOLE"/>
     </Root>
     <!-- Uncomment the following logger for debugging Key_Shared / PIP-379
