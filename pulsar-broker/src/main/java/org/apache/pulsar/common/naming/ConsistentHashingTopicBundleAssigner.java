@@ -18,15 +18,20 @@
  */
 package org.apache.pulsar.common.naming;
 
-import com.google.common.hash.Hashing;
+import com.google.common.hash.HashFunction;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.apache.pulsar.broker.PulsarService;
+import org.apache.pulsar.broker.namespace.NamespaceService;
 
 public class ConsistentHashingTopicBundleAssigner implements TopicBundleAssignmentStrategy {
+    private PulsarService pulsar;
+
+    private volatile HashFunction hashFunction;
+
     @Override
     public NamespaceBundle findBundle(TopicName topicName, NamespaceBundles namespaceBundles) {
-        long hashCode = Hashing.crc32().hashString(topicName.toString(), StandardCharsets.UTF_8).padToLong();
-        NamespaceBundle bundle = namespaceBundles.getBundle(hashCode);
+        NamespaceBundle bundle = namespaceBundles.getBundle(calculateBundleHashCode(topicName));
         if (topicName.getDomain().equals(TopicDomain.non_persistent)) {
             bundle.setHasNonPersistentTopic(true);
         }
@@ -34,7 +39,25 @@ public class ConsistentHashingTopicBundleAssigner implements TopicBundleAssignme
     }
 
     @Override
-    public void init(PulsarService pulsarService) {
+    public long calculateBundleHashCode(TopicName topicName) {
+        if (hashFunction == null) {
+            synchronized (ConsistentHashingTopicBundleAssigner.class) {
+                if (hashFunction == null) {
+                    hashFunction = getBundleHashFunc();
+                }
+            }
+        }
+        return hashFunction.hashString(topicName.toString(), StandardCharsets.UTF_8).padToLong();
     }
 
+    @Override
+    public void init(PulsarService pulsarService) {
+        this.pulsar = pulsarService;
+    }
+
+    private HashFunction getBundleHashFunc() {
+        return Optional.ofNullable(pulsar.getNamespaceService()).map(NamespaceService::getNamespaceBundleFactory)
+                .map(NamespaceBundleFactory::getHashFunc)
+                .orElseThrow(() -> new RuntimeException("HashFunc not specified"));
+    }
 }
