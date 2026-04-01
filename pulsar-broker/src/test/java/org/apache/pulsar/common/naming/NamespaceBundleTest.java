@@ -30,6 +30,7 @@ import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
 import com.google.common.hash.Hashing;
 import org.apache.pulsar.broker.PulsarService;
+import org.apache.pulsar.broker.namespace.NamespaceService;
 import org.apache.pulsar.metadata.api.extended.MetadataStoreExtended;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -122,7 +123,11 @@ public class NamespaceBundleTest {
         MetadataStoreExtended store = mock(MetadataStoreExtended.class);
         when(pulsar.getLocalMetadataStore()).thenReturn(store);
         when(pulsar.getConfigurationMetadataStore()).thenReturn(store);
-        return NamespaceBundleFactory.createFactory(pulsar, Hashing.crc32());
+        NamespaceService namespaceService = mock(NamespaceService.class);
+        when(pulsar.getNamespaceService()).thenReturn(namespaceService);
+        NamespaceBundleFactory namespaceBundleFactory = NamespaceBundleFactory.createFactory(pulsar, Hashing.crc32());
+        when(namespaceService.getNamespaceBundleFactory()).thenReturn(namespaceBundleFactory);
+        return namespaceBundleFactory;
     }
 
     @Test

@@ -29,7 +29,6 @@ import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
 import com.google.common.hash.HashFunction;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,6 +63,7 @@ import org.slf4j.LoggerFactory;
 public class NamespaceBundleFactory {
     private static final Logger LOG = LoggerFactory.getLogger(NamespaceBundleFactory.class);
 
+    @Getter
     private final HashFunction hashFunc;
 
     private final AsyncLoadingCache<NamespaceName, NamespaceBundles> bundlesCache;
@@ -292,7 +292,7 @@ public class NamespaceBundleFactory {
     }
 
     public long getLongHashCode(String name) {
-        return this.hashFunc.hashString(name, StandardCharsets.UTF_8).padToLong();
+        return this.topicBundleAssignmentStrategy.calculateBundleHashCode(TopicName.get(name));
     }
 
     public NamespaceBundles getBundles(NamespaceName nsname, BundlesData bundleData) {
